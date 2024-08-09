@@ -4,6 +4,8 @@ import subprocess
 
 import dotenv
 
+IGNORANT_USERS = ["root", "_apt", "sshd", "man", "fwupd-re"]
+
 # Get present working directory
 dotenv.load_dotenv(os.path.join(os.getcwd(), ".env"))
 
@@ -84,6 +86,9 @@ async def send_metrics():
     total_usage = aggregate_cpu_usage(log_dir)
     message = ""
     for user, cpu_time in total_usage.items():
+        if user in IGNORANT_USERS:
+            continue
+
         # Convert CPU time to human readable hours and minutes
         cpu_time_hours = cpu_time / 3600
         cpu_time_minutes = (cpu_time_hours % 1) * 60
