@@ -43,6 +43,20 @@ This project aggregates CPU usage data for users on a Unix-like system and sends
     ```
     > The script must be run with root privileges to access the CPU usage logs.
 
+## Scheduled Execution
+1. You can schedule the script to run at regular intervals using `cron`. To edit the `cron` jobs, run:
+    ```sh
+    sudo crontab -e
+    ```
+    > `sudo` is neccessary to edit the `cron` jobs as the script needs to be run with root privileges.
+2. Add the following line to the `cron` file to run the script for every six hours:
+    ```sh
+    0 */6 * * * /usr/bin/python3 /path/to/cpu-usage-aggregator/main.py
+    ```
+    > Replace `/path/to/cpu-usage-aggregator` with the path to the project directory.
+
+3. Save and exit the editor to apply the changes.
+
 ## How It Works
 
 1. The script reads the list of users from `/etc/passwd` and filters out the users specified in the `IGNORANT_USERS` list.
