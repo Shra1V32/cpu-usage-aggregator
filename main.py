@@ -3,8 +3,17 @@ import os
 import subprocess
 
 import dotenv
+from telethon import TelegramClient
 
-IGNORANT_USERS = ["root", "_apt", "sshd", "man", "fwupd-re"]
+IGNORANT_USERS = ["root", "_apt", "sshd", "man", "fwupd-re", "www-data"]
+
+# Ignore the users who are not in /etc/passwd
+# Get the list of users from /etc/passwd
+passwd_file = "/etc/passwd"
+with open(passwd_file, "r") as file:
+    lines = file.readlines()
+    ALIVE_USERS = [line.split(":")[0] for line in lines]
+
 
 # Get present working directory
 dotenv.load_dotenv(os.path.join(os.getcwd(), ".env"))
@@ -65,28 +74,16 @@ def aggregate_cpu_usage(log_dir):
     return total_usage
 
 
-def show_metrics():
-    log_dir = "/var/log/user_cpu_usage"
-
-    total_usage = aggregate_cpu_usage(log_dir)
-    for user, cpu_time in total_usage.items():
-        # Convert CPU time to human readable hours
-        cpu_time_hours = cpu_time / 3600
-        print(f"**User:** {user}, Total CPU Time: {cpu_time_hours:.2f} hours")
-
-
-# Use telethon to send the metrics to a Telegram channel
-from telethon import TelegramClient, events
-
 client = TelegramClient("bot", API_ID, API_HASH).start(bot_token=BOT_TOKEN)
 
 
 async def send_metrics():
     log_dir = "/var/log/user_cpu_usage"
+    save_logs()
     total_usage = aggregate_cpu_usage(log_dir)
     message = ""
     for user, cpu_time in total_usage.items():
-        if user in IGNORANT_USERS:
+        if user in IGNORANT_USERS or user not in ALIVE_USERS:
             continue
 
         # Convert CPU time to human readable hours and minutes
