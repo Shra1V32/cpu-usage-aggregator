@@ -23,8 +23,10 @@ class CPUUsageMonitor:
             # Example: sudharshan -> sudharsh
             self.ALIVE_USERS = [user[:8] for user in self.ALIVE_USERS]
 
+        env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
+
         # Get present working directory
-        dotenv.load_dotenv(os.path.join(os.getcwd(), ".env"))
+        dotenv.load_dotenv(env_path)
 
         self.API_ID = int(os.getenv("API_ID"))
         self.API_HASH = os.getenv("API_HASH")
