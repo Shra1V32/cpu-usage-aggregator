@@ -17,13 +17,19 @@ class CPUUsageMonitor:
         passwd_file = "/etc/passwd"
         with open(passwd_file, "r") as file:
             lines = file.readlines()
-            self.ALIVE_USERS = [line.split(":")[0] for line in lines]
+            self.ALIVE_USERS = []
+            for line in lines:
+                parts = line.split(":")
+                username = parts[0]
+                home_directory = parts[5]
+                if os.path.isdir(home_directory) and "home" in home_directory:
+                    print(
+                        f"Adding {username} to the list of users, as home directory: {home_directory} exists"
+                    )
 
-            # usernames should be truncated to 8 characters
-            # Example: sudharshan -> sudharsh
-            self.ALIVE_USERS = [user[:8] for user in self.ALIVE_USERS]
+                    self.ALIVE_USERS.append(username[:8])  # Truncate to 8 characters
 
-        env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
+        env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
 
         # Get present working directory
         dotenv.load_dotenv(env_path)
@@ -123,8 +129,19 @@ class CPUUsageMonitor:
                     self.total_usage[user] = self.total_usage.get(user, 0) + cpu_time
         return self.total_usage
 
+    def clear_previous_logs(self):
+        # Clear the previous logs, keep a max of 2 days
+        log_dir = "/var/log/user_cpu_usage"
+        files = os.listdir(log_dir)
+        if len(files) > 2:
+            files.sort()
+            for file in files[:-2]:
+                os.remove(os.path.join(log_dir, file))
+            print("Previous logs have been cleared")
+
     async def send_metrics(self):
         log_dir = "/var/log/user_cpu_usage"
+        self.clear_previous_logs()
         self.save_logs()
         total_usage = self.aggregate_cpu_usage(log_dir)
 
