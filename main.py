@@ -107,7 +107,13 @@ class CPUUsageMonitor:
         }
 
         plt.figure(figsize=(10, 5))
-        plt.bar(cpu_time_in_hours.keys(), cpu_time_in_hours.values(), color="magenta")
+        plt.bar(
+            cpu_time_in_hours.keys(),
+            cpu_time_in_hours.values(),
+            color="skyblue",
+            alpha=0.7,
+            edgecolor="black",
+        )
         plt.xlabel("Users")
         plt.ylabel("CPU Time (hours)")
         plt.title("CPU Usage by User")
