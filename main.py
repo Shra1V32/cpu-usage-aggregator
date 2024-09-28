@@ -136,14 +136,14 @@ class CPUUsageMonitor:
         return self.total_usage
 
     def clear_previous_logs(self):
-        # Clear the previous logs, keep a max of 2 days
+        # Clear the previous logs, keep a max of 7 days
         log_dir = "/var/log/user_cpu_usage"
         files = os.listdir(log_dir)
-        if len(files) > 2:
+        if len(files) > 7:
             files.sort()
-            for file in files[:-2]:
+            for file in files[:-7]:
                 os.remove(os.path.join(log_dir, file))
-            print("Previous logs have been cleared")
+                print(f"Removed {file}")
 
     async def send_metrics(self):
         log_dir = "/var/log/user_cpu_usage"
