@@ -3,6 +3,7 @@ import os
 import subprocess
 
 import dotenv
+import matplotlib.font_manager as fm
 import matplotlib.pyplot as plt
 import prettytable as pt
 from telethon import TelegramClient
@@ -29,10 +30,17 @@ class CPUUsageMonitor:
 
                     self.ALIVE_USERS.append(username[:8])  # Truncate to 8 characters
 
-        env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        env_path = os.path.join(base_path, ".env")
 
         # Get present working directory
         dotenv.load_dotenv(env_path)
+
+        # Load custom font
+        font_path = os.path.join(base_path, "fonts", "oplus.ttf")
+
+        # Load the custom font
+        self.font_prop = fm.FontProperties(fname=font_path)
 
         self.API_ID = int(os.getenv("API_ID"))
         self.API_HASH = os.getenv("API_HASH")
@@ -106,7 +114,8 @@ class CPUUsageMonitor:
             user: cpu_time / 3600 for user, cpu_time in self.total_usage.items()
         }
 
-        plt.figure(figsize=(10, 5))
+        plt.figure(figsize=(10, 5), dpi=300)
+
         plt.bar(
             cpu_time_in_hours.keys(),
             cpu_time_in_hours.values(),
@@ -114,11 +123,12 @@ class CPUUsageMonitor:
             alpha=0.7,
             edgecolor="black",
         )
-        plt.xlabel("Users")
-        plt.ylabel("CPU Time (hours)")
-        plt.title("CPU Usage by User")
-        plt.savefig("/var/log/cpu_usage.png")
-        return "/var/log/cpu_usage.png"
+        plt.xlabel("Users", fontproperties=self.font_prop)
+        plt.ylabel("CPU Time (hours)", fontproperties=self.font_prop)
+        plt.title("ServerHive - CPU Usage by User", fontproperties=self.font_prop)
+        plt.xticks(rotation=45)
+        plt.savefig("/var/log/cpu_usage.jpg", dpi=300)  # Ensure the resolution is high
+        return "/var/log/cpu_usage.jpg"
 
     def aggregate_cpu_usage(self, log_dir) -> dict:
         """
